@@ -30,3 +30,4 @@ import GlobalFooter from '@/components/GlobalFooter.vue'
   margin: 16px auto 56px;
 }
 </style>
+
