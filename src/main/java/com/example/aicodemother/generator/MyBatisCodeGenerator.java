@@ -15,7 +15,7 @@ import java.util.Map;
 public class MyBatisCodeGenerator {
 
     // 需要生成的表名, 需要经常修改, 下次可能需要生成其他表的代码
-    private static final String[] TABLE_NAMES = {"user"};
+    private static final String[] TABLE_NAMES = {"app"};
 
     public static void main(String[] args) {
         // 获取数据源信息
