@@ -6,6 +6,12 @@ spring:
     url: jdbc:mysql://localhost:3306/ai_code_mother
     username: root
     password: 1617929300
+  data:
+    redis:
+      host: 192.168.18.129
+      port: 6379
+      password: 1617929300
+      ttl: 3600
   profiles:
     active: local
 server:

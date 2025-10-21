@@ -1,6 +1,7 @@
 package com.example.aicodemother.core;
 
 import com.example.aicodemother.ai.AiCodeGeneratorService;
+import com.example.aicodemother.ai.AiCodeGeneratorServiceFactory;
 import com.example.aicodemother.ai.model.HtmlCodeResult;
 import com.example.aicodemother.ai.model.MultiFileCodeResult;
 import com.example.aicodemother.core.parser.CodeParserExecutor;
@@ -23,7 +24,7 @@ import java.io.File;
 public class AiCodeGeneratorFacade {
 
     @Resource
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
 
     /**
      * 统一入口, 根据类型生成并保存代码
@@ -37,6 +38,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
+        //根据 appId 获取相应的 AI 服务示例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -65,6 +68,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
+        //根据 appId 获取相应的 AI 服务示例
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
@@ -120,28 +125,28 @@ public class AiCodeGeneratorFacade {
      * @return 保存的目录
      * @deprecated 此方法已被优化版本替代，请使用新的实现
      */
-    @Deprecated(forRemoval = true)
-    private Flux<String> generateAndSaveHtmlCodeStream(String userMessage) {
-        Flux<String> result = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
-        // 字符串拼接器. 用于当流式返回所有的代码之后, 再保存代码
-        StringBuilder codeBuilder = new StringBuilder();
-        return result.doOnNext(chunk -> {
-            // 实时收集代码片段
-            codeBuilder.append(chunk);
-        }).doOnComplete(() -> {
-            // 流式返回完成后, 保存代码
-            try {
-                String completeHtmlCode = codeBuilder.toString();
-                // 解析代码位对象
-                HtmlCodeResult htmlCodeResult = CodeParser.parseHtmlCode(completeHtmlCode);
-                // 保存代码到文件
-                File saveDir = CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
-                log.info("保存成功, 保存目录: {}", saveDir.getAbsolutePath());
-            } catch (Exception e) {
-                log.error("保存失败: {}", e.getMessage());
-            }
-        });
-    }
+//    @Deprecated(forRemoval = true)
+//    private Flux<String> generateAndSaveHtmlCodeStream(String userMessage) {
+//        Flux<String> result = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
+//        // 字符串拼接器. 用于当流式返回所有的代码之后, 再保存代码
+//        StringBuilder codeBuilder = new StringBuilder();
+//        return result.doOnNext(chunk -> {
+//            // 实时收集代码片段
+//            codeBuilder.append(chunk);
+//        }).doOnComplete(() -> {
+//            // 流式返回完成后, 保存代码
+//            try {
+//                String completeHtmlCode = codeBuilder.toString();
+//                // 解析代码位对象
+//                HtmlCodeResult htmlCodeResult = CodeParser.parseHtmlCode(completeHtmlCode);
+//                // 保存代码到文件
+//                File saveDir = CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
+//                log.info("保存成功, 保存目录: {}", saveDir.getAbsolutePath());
+//            } catch (Exception e) {
+//                log.error("保存失败: {}", e.getMessage());
+//            }
+//        });
+//    }
 
     /*
      * 已废弃, 优化前的, 生成并保存多文件模式的代码 (流式)
@@ -163,11 +168,11 @@ public class AiCodeGeneratorFacade {
      * @return 保存的目录
      * @deprecated 此方法已被优化版本替代，请使用新的实现
      */
-    @Deprecated(forRemoval = true)
-    private File generateAndSaveHtmlCode(String userMessage) {
-        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
-        return CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
-    }
+//    @Deprecated(forRemoval = true)
+//    private File generateAndSaveHtmlCode(String userMessage) {
+//        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
+//        return CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
+//    }
 
     /**
      * 已废弃, 优化前的, 生成多文件模式的代码并保存
@@ -176,9 +181,9 @@ public class AiCodeGeneratorFacade {
      * @return 保存的目录
      * @deprecated 此方法已被优化版本替代，请使用新的实现
      */
-    @Deprecated(forRemoval = true)
-    private File generateAndSaveMultiFileCode(String userMessage) {
-        MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
-        return CodeFileSaver.saveMultiFileCodeResult(multiFileCodeResult);
-    }
+//    @Deprecated(forRemoval = true)
+//    private File generateAndSaveMultiFileCode(String userMessage) {
+//        MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
+//        return CodeFileSaver.saveMultiFileCodeResult(multiFileCodeResult);
+//    }
 }
