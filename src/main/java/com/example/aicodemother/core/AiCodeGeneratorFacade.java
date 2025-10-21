@@ -39,7 +39,7 @@ public class AiCodeGeneratorFacade {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
         //根据 appId 获取相应的 AI 服务示例
-        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId, codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -69,7 +69,7 @@ public class AiCodeGeneratorFacade {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
         //根据 appId 获取相应的 AI 服务示例
-        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId, codeGenTypeEnum);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
@@ -77,6 +77,10 @@ public class AiCodeGeneratorFacade {
             }
             case MULTI_FILE -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+                yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appId);
+            }
+            case VUE_PROJECT -> {
+                Flux<String> codeStream = aiCodeGeneratorService.generateVueProjectCodeStream(appId, userMessage);
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appId);
             }
             default -> {
@@ -118,13 +122,13 @@ public class AiCodeGeneratorFacade {
 
 //以下为优化前的废弃代码
 
-    /**
-     * 已废弃, 优化前的, 生成并保存 HTML 代码 (流式)
-     *
-     * @param userMessage 用户提示词
-     * @return 保存的目录
-     * @deprecated 此方法已被优化版本替代，请使用新的实现
-     */
+//    /**
+//     * 已废弃, 优化前的, 生成并保存 HTML 代码 (流式)
+//     *
+//     * @param userMessage 用户提示词
+//     * @return 保存的目录
+//     * @deprecated 此方法已被优化版本替代，请使用新的实现
+//     */
 //    @Deprecated(forRemoval = true)
 //    private Flux<String> generateAndSaveHtmlCodeStream(String userMessage) {
 //        Flux<String> result = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
@@ -161,26 +165,26 @@ public class AiCodeGeneratorFacade {
 //        return processCodeStream(result, CodeGenTypeEnum.MULTI_FILE);
 //    }
 
-    /**
-     * 已废弃, 优化前的, 生成并保存 HTML 代码
-     *
-     * @param userMessage 用户提示词
-     * @return 保存的目录
-     * @deprecated 此方法已被优化版本替代，请使用新的实现
-     */
+//    /**
+//     * 已废弃, 优化前的, 生成并保存 HTML 代码
+//     *
+//     * @param userMessage 用户提示词
+//     * @return 保存的目录
+//     * @deprecated 此方法已被优化版本替代，请使用新的实现
+//     */
 //    @Deprecated(forRemoval = true)
 //    private File generateAndSaveHtmlCode(String userMessage) {
 //        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
 //        return CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
 //    }
 
-    /**
-     * 已废弃, 优化前的, 生成多文件模式的代码并保存
-     *
-     * @param userMessage 用户提示词
-     * @return 保存的目录
-     * @deprecated 此方法已被优化版本替代，请使用新的实现
-     */
+//    /**
+//     * 已废弃, 优化前的, 生成多文件模式的代码并保存
+//     *
+//     * @param userMessage 用户提示词
+//     * @return 保存的目录
+//     * @deprecated 此方法已被优化版本替代，请使用新的实现
+//     */
 //    @Deprecated(forRemoval = true)
 //    private File generateAndSaveMultiFileCode(String userMessage) {
 //        MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
