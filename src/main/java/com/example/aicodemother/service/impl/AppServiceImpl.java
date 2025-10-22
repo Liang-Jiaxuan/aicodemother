@@ -7,6 +7,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.example.aicodemother.constant.AppConstant;
 import com.example.aicodemother.core.AiCodeGeneratorFacade;
+import com.example.aicodemother.core.handler.StreamHandlerExecutor;
 import com.example.aicodemother.exception.BusinessException;
 import com.example.aicodemother.exception.ErrorCode;
 import com.example.aicodemother.exception.ThrowUtils;
@@ -55,6 +56,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private ChatHistoryService chatHistoryService;
 
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
+
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
         // 1. 参数校验
@@ -76,22 +80,12 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 5. 在调用 AI 前, 先保存用户消息到数据库中
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
         // 6. 调用 AI 生成代码(流式)
-        Flux<String> contentFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
         // 7. 收集 AI 响应的内容, 并且在完成后保存记录到对话历史
-        StringBuilder aiResponseBuilder = new StringBuilder();
-        return contentFlux.map(chunk -> {
-            // 实时收集 AI 响应的内容
-            aiResponseBuilder.append(chunk);
-            return chunk;
-        }).doOnComplete(() -> {
-            // 流式返回完成后, 保存 AI 消息到对话历史中
-            String aiResponse = aiResponseBuilder.toString();
-            chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-        }).doOnError(error -> {
-            // 如果 AI 回复失败, 也要保存记录到数据库中
-            String errorMessage = "AI 回复失败: " + error.getMessage();
-            chatHistoryService.addChatMessage(appId, errorMessage, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-        });
+        // 在 HTML 和 多文件模式下, chunk 就是 xxx 消息, 直接拼接就行,
+        // 但是在 VUE_PROJECT 模式下, chunk 是封装好的 JSON, {"type":"xxx", "data":"xxx"}
+        // 所以针对不同情况单独定义一个流处理器, 防止逻辑相互影响
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
     }
 
     @Override
@@ -205,16 +199,17 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     /**
      * 删除应用时, 关联删除对话历史
+     *
      * @param id 应用 ID
      * @return 删除结果
      */
     @Override
     public boolean removeById(Serializable id) {
-        if(id == null) {
+        if (id == null) {
             return false;
         }
         long appId = Long.parseLong(id.toString());
-        if(appId <= 0) {
+        if (appId <= 0) {
             return false;
         }
         // 先删除应用关联的对话历史
