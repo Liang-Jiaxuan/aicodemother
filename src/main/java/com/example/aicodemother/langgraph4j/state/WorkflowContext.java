@@ -1,6 +1,7 @@
 package com.example.aicodemother.langgraph4j.state;
 
 import com.example.aicodemother.langgraph4j.model.ImageResource;
+import com.example.aicodemother.langgraph4j.model.QualityResult;
 import com.example.aicodemother.model.enums.CodeGenTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,6 +69,11 @@ public class WorkflowContext implements Serializable {
      * 构建成功的目录
      */
     private String buildResultDir;
+
+    /**
+     * 质量检查结果
+     */
+    private QualityResult qualityResult;
 
     /**
      * 错误信息
