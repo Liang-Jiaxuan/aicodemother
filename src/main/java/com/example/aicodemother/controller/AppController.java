@@ -3,7 +3,6 @@ package com.example.aicodemother.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.example.aicodemother.ai.AiCodeGenTypeRoutingService;
 import com.example.aicodemother.annotation.AuthCheck;
 import com.example.aicodemother.common.BaseResponse;
 import com.example.aicodemother.common.DeleteRequest;
@@ -53,9 +52,6 @@ public class AppController {
 
     @Resource
     private ProjectDownloadService projectDownloadService;
-
-    @Resource
-    private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
 
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
