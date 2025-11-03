@@ -12,6 +12,7 @@ public interface AiCodeGeneratorService {
 
     /**
      * 生成 HTML 代码
+     *
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
@@ -20,6 +21,7 @@ public interface AiCodeGeneratorService {
 
     /**
      * 生成 多文件 代码
+     *
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
@@ -28,6 +30,7 @@ public interface AiCodeGeneratorService {
 
     /**
      * 流式生成 HTML 代码
+     *
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
@@ -36,6 +39,7 @@ public interface AiCodeGeneratorService {
 
     /**
      * 流式生成 多文件 代码
+     *
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
@@ -44,6 +48,7 @@ public interface AiCodeGeneratorService {
 
     /**
      * 流式生成 Vue项目 代码
+     *
      * @param userMessage 用户提示词
      * @return AI 的输出结果
      */
