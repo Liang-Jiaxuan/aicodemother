@@ -3,14 +3,15 @@ package com.example.aicodemother.aop;
 import com.example.aicodemother.annotation.AuthCheck;
 import com.example.aicodemother.exception.BusinessException;
 import com.example.aicodemother.exception.ErrorCode;
+import com.example.aicodemother.innerservice.InnerUserService;
 import com.example.aicodemother.model.entity.User;
 import com.example.aicodemother.model.enums.UserRoleEnum;
-import com.example.aicodemother.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -21,7 +22,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class AuthInterceptor {
 
     @Resource
-    private UserService userService;
+    @Lazy
+    private InnerUserService userService;
 
     /**
      * 执行拦截
@@ -35,7 +37,7 @@ public class AuthInterceptor {
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         // 当前登录用户
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = InnerUserService.getLoginUser(request);
         UserRoleEnum mustRoleEnum = UserRoleEnum.getEnumByValue(mustRole);
         // 不需要权限，放行
         if (mustRoleEnum == null) {

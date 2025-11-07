@@ -1,10 +1,10 @@
 package com.example.aicodemother.ratelimiter.aspect;
 
+import com.example.aicodemother.ratelimiter.annotation.RateLimit;
 import com.example.aicodemother.exception.BusinessException;
 import com.example.aicodemother.exception.ErrorCode;
+import com.example.aicodemother.innerservice.InnerUserService;
 import com.example.aicodemother.model.entity.User;
-import com.example.aicodemother.ratelimiter.annotation.RateLimit;
-import com.example.aicodemother.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +33,6 @@ public class RateLimitAspect {
 
     @Resource
     private RedissonClient redissonClient;
-
-    @Resource
-    private UserService userService;
 
     @Before("@annotation(rateLimit)")
     public void doBefore(JoinPoint point, RateLimit rateLimit) {
@@ -80,7 +77,7 @@ public class RateLimitAspect {
                     ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
                     if (attributes != null) {
                         HttpServletRequest request = attributes.getRequest();
-                        User loginUser = userService.getLoginUser(request);
+                        User loginUser = InnerUserService.getLoginUser(request);
                         keyBuilder.append("user:").append(loginUser.getId());
                     } else {
                         // 无法获取请求上下文，使用IP限流

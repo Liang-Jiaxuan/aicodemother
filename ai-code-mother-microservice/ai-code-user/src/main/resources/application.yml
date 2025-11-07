@@ -15,10 +15,12 @@ spring:
   # redis
   data:
     redis:
-      host: localhost
+      host: 192.168.18.129
       port: 6379
       database: 0
       password: 1617929300
+  profiles:
+    active: local
 server:
   port: 8124
   servlet:

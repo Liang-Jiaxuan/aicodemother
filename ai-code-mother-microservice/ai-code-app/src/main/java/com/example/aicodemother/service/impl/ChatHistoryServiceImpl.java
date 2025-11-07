@@ -2,6 +2,9 @@ package com.example.aicodemother.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.example.aicodemother.mapper.ChatHistoryMapper;
+import com.example.aicodemother.service.AppService;
+import com.example.aicodemother.service.ChatHistoryService;
 import com.example.aicodemother.constant.UserConstant;
 import com.example.aicodemother.exception.ErrorCode;
 import com.example.aicodemother.exception.ThrowUtils;
@@ -9,13 +12,10 @@ import com.example.aicodemother.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.example.aicodemother.model.entity.App;
 import com.example.aicodemother.model.entity.User;
 import com.example.aicodemother.model.enums.ChatHistoryMessageTypeEnum;
-import com.example.aicodemother.service.AppService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.example.aicodemother.model.entity.ChatHistory;
-import com.example.aicodemother.mapper.ChatHistoryMapper;
-import com.example.aicodemother.service.ChatHistoryService;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory>  implements ChatHistoryService{
+public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory> implements ChatHistoryService {
 
     @Resource
     @Lazy

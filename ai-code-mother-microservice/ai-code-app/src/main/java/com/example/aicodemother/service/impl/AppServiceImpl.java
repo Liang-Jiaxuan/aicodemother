@@ -5,15 +5,20 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.example.aicodemother.ai.AiCodeGenTypeRoutingService;
 import com.example.aicodemother.ai.AiCodeGenTypeRoutingServiceFactory;
-import com.example.aicodemother.constant.AppConstant;
 import com.example.aicodemother.core.AiCodeGeneratorFacade;
 import com.example.aicodemother.core.builder.VueProjectBuilder;
 import com.example.aicodemother.core.handler.StreamHandlerExecutor;
+import com.example.aicodemother.mapper.AppMapper;
+import com.example.aicodemother.service.AppService;
+import com.example.aicodemother.service.ChatHistoryService;
+import com.example.aicodemother.ai.AiCodeGenTypeRoutingService;
+import com.example.aicodemother.constant.AppConstant;
 import com.example.aicodemother.exception.BusinessException;
 import com.example.aicodemother.exception.ErrorCode;
 import com.example.aicodemother.exception.ThrowUtils;
+import com.example.aicodemother.innerservice.InnerScreenshotService;
+import com.example.aicodemother.innerservice.InnerUserService;
 import com.example.aicodemother.model.dto.app.AppAddRequest;
 import com.example.aicodemother.model.dto.app.AppQueryRequest;
 import com.example.aicodemother.model.entity.User;
@@ -21,19 +26,13 @@ import com.example.aicodemother.model.enums.ChatHistoryMessageTypeEnum;
 import com.example.aicodemother.model.enums.CodeGenTypeEnum;
 import com.example.aicodemother.model.vo.AppVO;
 import com.example.aicodemother.model.vo.UserVO;
-import com.example.aicodemother.monitor.MonitorContext;
-import com.example.aicodemother.monitor.MonitorContextHolder;
-import com.example.aicodemother.service.ChatHistoryService;
-import com.example.aicodemother.service.ScreenshotService;
-import com.example.aicodemother.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.example.aicodemother.model.entity.App;
-import com.example.aicodemother.mapper.AppMapper;
-import com.example.aicodemother.service.AppService;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -59,7 +58,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     private String deployHost;
 
     @Resource
-    private UserService userService;
+    @Lazy
+    private InnerUserService userService;
 
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
@@ -74,7 +74,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     private VueProjectBuilder vueProjectBuilder;
 
     @Resource
-    private ScreenshotService screenshotService;
+    @Lazy
+    private InnerScreenshotService screenshotService;
 
     @Resource
     private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
@@ -99,24 +100,13 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }
         // 5. 在调用 AI 前, 先保存用户消息到数据库中
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
-        // 6. 设置监控上下文(用户 ID 和应用 ID)
-        MonitorContextHolder.setContext(
-                MonitorContext.builder()
-                        .userId(loginUser.getId().toString())
-                        .appId(appId.toString())
-                        .build()
-        );
-        // 7. 调用 AI 生成代码(流式)
+        // 6. 调用 AI 生成代码(流式)
         Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
-        // 8. 收集 AI 响应的内容, 并且在完成后保存记录到对话历史
+        // 7. 收集 AI 响应的内容, 并且在完成后保存记录到对话历史
         // 在 HTML 和 多文件模式下, chunk 就是 xxx 消息, 直接拼接就行,
         // 但是在 VUE_PROJECT 模式下, chunk 是封装好的 JSON, {"type":"xxx", "data":"xxx"}
         // 所以针对不同情况单独定义一个流处理器, 防止逻辑相互影响
-        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum)
-                .doFinally(signalType -> {
-                    // 流结束时清除监控上下文(无论成功/失败/取消)
-                    MonitorContextHolder.clearContext();
-                });
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
     }
 
     @Override

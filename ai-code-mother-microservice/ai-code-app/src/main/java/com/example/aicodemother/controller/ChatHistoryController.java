@@ -1,17 +1,17 @@
 package com.example.aicodemother.controller;
 
 
+import com.example.aicodemother.service.ChatHistoryService;
 import com.example.aicodemother.annotation.AuthCheck;
 import com.example.aicodemother.common.BaseResponse;
 import com.example.aicodemother.common.ResultUtils;
 import com.example.aicodemother.constant.UserConstant;
 import com.example.aicodemother.exception.ErrorCode;
 import com.example.aicodemother.exception.ThrowUtils;
+import com.example.aicodemother.innerservice.InnerUserService;
 import com.example.aicodemother.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.example.aicodemother.model.entity.ChatHistory;
 import com.example.aicodemother.model.entity.User;
-import com.example.aicodemother.service.ChatHistoryService;
-import com.example.aicodemother.service.UserService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -32,9 +32,6 @@ public class ChatHistoryController {
     @Resource
     private ChatHistoryService chatHistoryService;
 
-    @Resource
-    private UserService userService;
-
     /**
      * 分页查询某个应用的对话历史（游标查询）
      *
@@ -49,7 +46,7 @@ public class ChatHistoryController {
                                                               @RequestParam(defaultValue = "10") int pageSize,
                                                               @RequestParam(required = false) LocalDateTime lastCreateTime,
                                                               HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = InnerUserService.getLoginUser(request);
         Page<ChatHistory> result = chatHistoryService.listAppChatHistoryByPage(appId, pageSize, lastCreateTime, loginUser);
         return ResultUtils.success(result);
     }
