@@ -1,6 +1,6 @@
 package com.example.aicodeuser.mapper;
 
-import com.example.aicodeuser.model.entity.User;
+import com.example.aicodemother.model.entity.User;
 import com.mybatisflex.core.BaseMapper;
 
 /**

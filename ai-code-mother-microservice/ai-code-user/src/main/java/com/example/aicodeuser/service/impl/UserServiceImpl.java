@@ -3,14 +3,14 @@ package com.example.aicodeuser.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.example.aicodeuser.exception.BusinessException;
-import com.example.aicodeuser.exception.ErrorCode;
+import com.example.aicodemother.exception.BusinessException;
+import com.example.aicodemother.exception.ErrorCode;
 import com.example.aicodeuser.mapper.UserMapper;
-import com.example.aicodeuser.model.dto.user.UserQueryRequest;
-import com.example.aicodeuser.model.entity.User;
-import com.example.aicodeuser.model.enums.UserRoleEnum;
-import com.example.aicodeuser.model.vo.LoginUserVO;
-import com.example.aicodeuser.model.vo.UserVO;
+import com.example.aicodemother.model.dto.user.UserQueryRequest;
+import com.example.aicodemother.model.entity.User;
+import com.example.aicodemother.model.enums.UserRoleEnum;
+import com.example.aicodemother.model.vo.LoginUserVO;
+import com.example.aicodemother.model.vo.UserVO;
 import com.example.aicodeuser.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.aicodeuser.constant.UserConstant.USER_LOGIN_STATE;
+import static com.example.aicodemother.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  *  服务层实现。

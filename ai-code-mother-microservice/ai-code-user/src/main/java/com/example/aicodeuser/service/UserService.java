@@ -1,9 +1,9 @@
 package com.example.aicodeuser.service;
 
-import com.example.aicodeuser.model.dto.user.UserQueryRequest;
-import com.example.aicodeuser.model.entity.User;
-import com.example.aicodeuser.model.vo.LoginUserVO;
-import com.example.aicodeuser.model.vo.UserVO;
+import com.example.aicodemother.model.dto.user.UserQueryRequest;
+import com.example.aicodemother.model.entity.User;
+import com.example.aicodemother.model.vo.LoginUserVO;
+import com.example.aicodemother.model.vo.UserVO;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
